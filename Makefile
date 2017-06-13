@@ -15,13 +15,13 @@ CFLAGS += -Wall
 # Enables extra warning flags that are not enabled by -Wall.
 CFLAGS += -Wextra
 CFLAGS += -Isrc
-CFLAGS += -rdynamic
+# CFLAGS += -rdynamic
 CFLAGS += -DNDEBUG
 CFLAGS += $(OPTFLAGS) # Augment the build options as needed
 
 # LDFLAGS is a variable used in Makefiles. Specifically its value is added to
 # linker command lines when the linker is invoked by an implicit rule.
-LDLIBS = -ldl $(OPTLIBS)
+LDFLAGS = -ldl $(OPTLIBS)
 
 # Set an optional variable called PREFIX that will only have this value
 # if the person running the makefile didn't already give a prefix setting.
@@ -44,7 +44,8 @@ TARGET=build/libdarray.a
 SO_TARGET=$(patsubst %.a,%.so,$(TARGET))
 
 # The Target Build
-all: $(TARGET) $(SO_TARGET) tests
+# all: $(TARGET) $(SO_TARGET) tests
+all: $(TARGET) tests
 
 dev: CFLAGS=-g -Wall -Isrc -Wall -Wextra $(OPTFLAGS)
 dev: all
@@ -55,6 +56,7 @@ $(TARGET): build $(OBJECTS)
 	ranlib $@
 
 build:
+	@echo $(OBJECTS)
 	@mkdir -p build
 	@mkdir -p bin
 
@@ -67,7 +69,7 @@ build:
 #
 # https://www.gnu.org/software/make/manual/html_node/Phony-Targets.html
 .PHONY: tests
-tests: CFLAGS += $(TARGET)
+tests: LDLIBS += $(TARGET)
 tests: $(TESTS)
 	sh ./tests/runtests.sh
 
