@@ -70,6 +70,7 @@ error:
 }
 
 static inline void * DArray_remove(DArray * array, int i) {
+  check(array != NULL, "darray is NULL");
   check(i < array->max, "darray attempt to remove past max");
 
   void * el = array->contents[i];
