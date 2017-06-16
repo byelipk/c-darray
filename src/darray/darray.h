@@ -24,7 +24,7 @@ typedef struct {
   void **contents;
 } DArray;
 
-DArray * DArray_create(size_t element_size, size_t initial_max);
+DArray * DArray_init(size_t element_size, size_t initial_max);
 
 void DArray_destroy(DArray * array);
 
@@ -40,12 +40,16 @@ void * DArray_pop(DArray * array);
 
 void DArray_implode(DArray * array);
 
+void DArray_qsort(DArray * array, int lo, int hi);
+int DArray_partition(DArray * array, int lo, int hi);
+
 
 #define DArray_last(A)  ((A)->contents[(A)->end - 1])
 #define DArray_first(A) ((A)->contents[0])
 #define DArray_end(A)   ((A)->end)
 #define DArray_count(A) DArray_end(A)
 #define DArray_max(A)   ((A)->max)
+#define DArray_last_index(A) (DArray_end(A) - 1)
 
 #define DEFAULT_EXPAND_RATE 300
 
@@ -83,9 +87,9 @@ error:
   return NULL;
 }
 
-static inline void * DArray_new(DArray * array) {
+static inline void * DArray_create_element(DArray * array) {
   check(array->element_size > 0,
-    "Can't use DArray_new on 0 size arrays.");
+    "Can't use DArray_create_element on 0 size arrays.");
 
   return calloc(1, array->element_size);
 

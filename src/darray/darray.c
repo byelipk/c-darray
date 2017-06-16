@@ -1,7 +1,8 @@
 #include <darray/darray.h>
 #include <assert.h>
+#include <math.h>
 
-DArray * DArray_create(size_t element_size, size_t initial_max) {
+DArray * DArray_init(size_t element_size, size_t initial_max) {
   DArray * array = malloc(sizeof(DArray));
   check_mem(array);
 
@@ -77,6 +78,10 @@ int DArray_push(DArray * array, void * value) {
   }
 }
 
+// NOTE
+// When we pop an item out of the array, our array is no longer
+// responsible for freeing up the memory. We need to call
+// DArray_free() on any element we pop from the array.
 void * DArray_pop(DArray * array) {
   check(array->end - 1 >= 0, "Cannot pop from empty array.");
 
@@ -115,4 +120,37 @@ void DArray_destroy(DArray * array) {
 void DArray_implode(DArray * array) {
   DArray_clear(array);
   DArray_destroy(array);
+}
+
+void DArray_qsort(DArray * array, int lo, int hi) {
+  if (DArray_count(array) < 2) { return; }
+
+  if (lo < hi) {
+    int pivotIndex = DArray_partition(array, lo, hi);
+
+    DArray_qsort(array, lo, pivotIndex);
+    DArray_qsort(array, pivotIndex+1, hi);
+  }
+}
+
+int DArray_partition(DArray * array, int lo, int hi) {
+  int pivotIndex = (int)floor(lo + (hi - lo) / 2);
+  int * pivotValue = DArray_get(array, pivotIndex);
+
+  int i = lo - 1;
+  int j = hi + 1;
+
+  while (1) {
+    do { i++; } while(*(int *)DArray_get(array, i) < *pivotValue);
+    do { j--; } while(*(int *)DArray_get(array, j) > *pivotValue);
+
+    if (i < j) {
+      int * temp = DArray_get(array, j);
+      DArray_set(array, j, DArray_get(array, i));
+      DArray_set(array, i, temp);
+    }
+    else {
+      return j;
+    }
+  }
 }

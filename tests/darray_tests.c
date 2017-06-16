@@ -6,7 +6,7 @@ char * test_it_works() {
 }
 
 char * test_create() {
-  DArray * array = DArray_create(sizeof(int), 100);
+  DArray * array = DArray_init(sizeof(int), 100);
 
   mu_assert(array != NULL, "DArray_create failed.");
   mu_assert(array->contents != NULL, "contents are wrong in darray");
@@ -20,9 +20,9 @@ char * test_create() {
 }
 
 char * test_new() {
-  DArray * array = DArray_create(sizeof(int), 100);
+  DArray * array = DArray_init(sizeof(int), 100);
 
-  int * value = DArray_new(array);
+  int * value = DArray_create_element(array);
 
   mu_assert(value != NULL, "Failed to make new element.");
 
@@ -34,11 +34,11 @@ char * test_new() {
 
 char * test_set_and_get() {
   // Step 1: Create the array
-  DArray * array = DArray_create(sizeof(int), 100);
+  DArray * array = DArray_init(sizeof(int), 100);
 
   // Step 2: Allocate memory for array elements
-  int * value1 = DArray_new(array);
-  int * value2 = DArray_new(array);
+  int * value1 = DArray_create_element(array);
+  int * value2 = DArray_create_element(array);
 
   // Step 3: Dereference the pointers and assign values to the array
   *value1 = 100;
@@ -66,10 +66,10 @@ char * test_set_and_get() {
 }
 
 char * test_remove() {
-  DArray * array = DArray_create(sizeof(int), 100);
+  DArray * array = DArray_init(sizeof(int), 100);
 
-  int * val1 = DArray_new(array);
-  int * val2 = DArray_new(array);
+  int * val1 = DArray_create_element(array);
+  int * val2 = DArray_create_element(array);
 
   *val1 = 100;
   *val2 = 200;
@@ -95,10 +95,10 @@ char * test_remove() {
 }
 
 char * test_expand_contract() {
-  DArray * array = DArray_create(sizeof(int), 100);
+  DArray * array = DArray_init(sizeof(int), 100);
 
-  int * val1 = DArray_new(array);
-  int * val2 = DArray_new(array);
+  int * val1 = DArray_create_element(array);
+  int * val2 = DArray_create_element(array);
 
   *val1 = 100;
   *val2 = 200;
@@ -127,10 +127,10 @@ char * test_expand_contract() {
 }
 
 char * test_push_pop() {
-  DArray * array = DArray_create(sizeof(int), 100);
+  DArray * array = DArray_init(sizeof(int), 100);
 
   for (int i = 0; i < 1000; i++) {
-    int * val = DArray_new(array);
+    int * val = DArray_create_element(array);
     *val = i * 333;
     DArray_push(array, val);
   }
@@ -141,7 +141,56 @@ char * test_push_pop() {
     int * val = DArray_pop(array);
     mu_assert(val != NULL, "Shouldn't get a NULL value");
     mu_assert(*val == i * 333, "Wrong value.");
+    DArray_free(val);
   }
+
+  DArray_implode(array);
+
+  return NULL;
+}
+
+char * test_array_with_one_element_is_sorted() {
+  DArray * array = DArray_init(sizeof(int), 100);
+  int * element  = DArray_create_element(array);
+  *element = 1;
+  DArray_push(array, element);
+
+  mu_assert(DArray_get(array, 0) == element, "Wrong element at index 0");
+
+  DArray_qsort(array, 0, DArray_last_index(array));
+
+  mu_assert(DArray_get(array, 0) == element,
+    "Wrong element at index 0 after sort");
+
+  DArray_implode(array);
+
+  return NULL;
+}
+
+char * test_array_with_many_elements_is_sorted() {
+  DArray * array = DArray_init(sizeof(int), 100);
+
+  int * el1 = DArray_create_element(array); *el1 = 1;
+  int * el2 = DArray_create_element(array); *el2 = 2;
+  int * el3 = DArray_create_element(array); *el3 = 3;
+  int * el4 = DArray_create_element(array); *el4 = 4;
+  int * el5 = DArray_create_element(array); *el5 = 5;
+
+  DArray_push(array, el3);
+  DArray_push(array, el5);
+  DArray_push(array, el1);
+  DArray_push(array, el4);
+  DArray_push(array, el2);
+
+  mu_assert(DArray_get(array, 0) == el3, "Wrong element at index 0");
+
+  DArray_qsort(array, 0, DArray_last_index(array));
+
+  mu_assert(DArray_get(array, 0) == el1, "Wrong element at index 0 after sort");
+  mu_assert(DArray_get(array, 1) == el2, "Wrong element at index 1 after sort");
+  mu_assert(DArray_get(array, 2) == el3, "Wrong element at index 2 after sort");
+  mu_assert(DArray_get(array, 3) == el4, "Wrong element at index 3 after sort");
+  mu_assert(DArray_get(array, 4) == el5, "Wrong element at index 4 after sort");
 
   DArray_implode(array);
 
@@ -158,6 +207,8 @@ char * all_tests() {
   mu_run_test(test_remove);
   mu_run_test(test_expand_contract);
   mu_run_test(test_push_pop);
+  mu_run_test(test_array_with_one_element_is_sorted);
+  mu_run_test(test_array_with_many_elements_is_sorted);
 
   return NULL;
 }
