@@ -145,7 +145,7 @@ int DArray_partition(DArray * array, int lo, int hi) {
     do { j--; } while(*(int *)DArray_get(array, j) > *pivotValue);
 
     if (i < j) {
-      int * temp = DArray_get(array, j);
+      void * temp = DArray_get(array, j);
       DArray_set(array, j, DArray_get(array, i));
       DArray_set(array, i, temp);
     }
