@@ -38,7 +38,7 @@ int DArray_push(DArray * array, void * value);
 
 void * DArray_pop(DArray * array);
 
-void DArray_implode(DArray * array);
+void DArray_cleanup(DArray * array);
 
 void DArray_qsort(DArray * array, int lo, int hi);
 int DArray_partition(DArray * array, int lo, int hi);

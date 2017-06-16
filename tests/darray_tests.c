@@ -1,5 +1,7 @@
 #include "minunit.h"
 #include <darray/darray.h>
+#include <darray/bstrlib.h>
+#include <darray/bstraux.h>
 
 char * test_it_works() {
   return NULL;
@@ -14,7 +16,7 @@ char * test_create() {
   mu_assert(array->max == 100, "end isn't at the right spot");
   mu_assert(array->element_size == sizeof(int), "element size is wrong");
 
-  DArray_implode(array);
+  DArray_cleanup(array);
 
   return NULL;
 }
@@ -27,7 +29,7 @@ char * test_new() {
   mu_assert(value != NULL, "Failed to make new element.");
 
   DArray_free(value);
-  DArray_implode(array);
+  DArray_cleanup(array);
 
   return NULL;
 }
@@ -60,7 +62,7 @@ char * test_set_and_get() {
   mu_assert(*value2 == 200, "Expected value to equal 200");
 
   // Free memory used by array elements, and the array itself
-  DArray_implode(array);
+  DArray_cleanup(array);
 
   return NULL;
 }
@@ -89,7 +91,7 @@ char * test_remove() {
   mu_assert(DArray_get(array, 1) == NULL, "Should be gone");
   DArray_free(val_check);
 
-  DArray_implode(array);
+  DArray_cleanup(array);
 
   return NULL;
 }
@@ -121,7 +123,7 @@ char * test_expand_contract() {
   mu_assert((unsigned int)array->max == array->expand_rate + 1,
     "Should stay at the expand rate at least.");
 
-  DArray_implode(array);
+  DArray_cleanup(array);
 
   return NULL;
 }
@@ -144,7 +146,7 @@ char * test_push_pop() {
     DArray_free(val);
   }
 
-  DArray_implode(array);
+  DArray_cleanup(array);
 
   return NULL;
 }
@@ -162,7 +164,7 @@ char * test_array_with_one_element_is_sorted() {
   mu_assert(DArray_get(array, 0) == element,
     "Wrong element at index 0 after sort");
 
-  DArray_implode(array);
+  DArray_cleanup(array);
 
   return NULL;
 }
@@ -192,7 +194,37 @@ char * test_array_with_many_elements_is_sorted() {
   mu_assert(DArray_get(array, 3) == el4, "Wrong element at index 3 after sort");
   mu_assert(DArray_get(array, 4) == el5, "Wrong element at index 4 after sort");
 
-  DArray_implode(array);
+  DArray_cleanup(array);
+
+  return NULL;
+}
+
+char * test_qsort_with_strings() {
+  bstring b_sen1 = bfromcstr("abc");
+  bstring b_sen2 = bfromcstr("def");
+  bstring b_sen3 = bfromcstr("efg");
+
+  DArray * array = DArray_init(sizeof(bstring), 100);
+
+  bstring * el1 = DArray_create_element(array); *el1 = b_sen1;
+  bstring * el2 = DArray_create_element(array); *el2 = b_sen2;
+  bstring * el3 = DArray_create_element(array); *el3 = b_sen3;
+
+  DArray_push(array, el3);
+  DArray_push(array, el1);
+  DArray_push(array, el2);
+
+  DArray_qsort(array, 0, DArray_last_index(array));
+
+  mu_assert(DArray_get(array, 0) == el1, "Wrong element at index 0 after sort");
+  mu_assert(DArray_get(array, 1) == el2, "Wrong element at index 1 after sort");
+  mu_assert(DArray_get(array, 2) == el3, "Wrong element at index 2 after sort");
+
+  DArray_cleanup(array);
+
+  bdestroy(b_sen1);
+  bdestroy(b_sen2);
+  bdestroy(b_sen3);
 
   return NULL;
 }
@@ -209,6 +241,7 @@ char * all_tests() {
   mu_run_test(test_push_pop);
   mu_run_test(test_array_with_one_element_is_sorted);
   mu_run_test(test_array_with_many_elements_is_sorted);
+  mu_run_test(test_qsort_with_strings);
 
   return NULL;
 }

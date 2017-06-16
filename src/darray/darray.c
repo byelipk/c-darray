@@ -117,7 +117,7 @@ void DArray_destroy(DArray * array) {
   }
 }
 
-void DArray_implode(DArray * array) {
+void DArray_cleanup(DArray * array) {
   DArray_clear(array);
   DArray_destroy(array);
 }
